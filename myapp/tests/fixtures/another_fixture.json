@@ -1,0 +1,9 @@
+[
+    {
+        "model": "myapp.mymodel",
+        "pk": 2,
+        "fields": {
+            "name": "Test Object 2 - test different fixture"
+        }
+    }
+]

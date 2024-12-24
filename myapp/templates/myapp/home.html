@@ -1,0 +1,13 @@
+<html>
+    <head>
+        <title>Home</title>
+    </head>
+    <body>
+        <h1>Welcome to my app</h1>
+        {% if request.user %}
+            <p>Current user(request.user): {{ request.user }}</p>
+        {% else %}
+            <p>User not found</p>
+        {% endif %}
+    </body>
+</html>

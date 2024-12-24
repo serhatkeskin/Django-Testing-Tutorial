@@ -1,0 +1,9 @@
+[
+    {
+        "model": "myapp.mymodel",
+        "pk": 1,
+        "fields": {
+            "name": "Test Object 1"
+        }
+    }
+]

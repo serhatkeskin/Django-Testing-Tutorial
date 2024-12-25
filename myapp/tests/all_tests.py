@@ -19,7 +19,72 @@ from myapp.models import MyModel, MyProduct
 import unittest
 import time
 
-print("### connection.vendor: ", connection.vendor)  # Outputs 'sqlite', 'postgresql', 'mysql', etc.
+print(
+    "### connection.vendor: ", connection.vendor
+)  # Outputs 'sqlite', 'postgresql', 'mysql', etc.
+
+
+class MyTestAssertsCase(TestCase):
+    def test_asserts(self):
+        # region assertEqual
+        self.assertEqual(1, 1)
+        self.assertEqual(1, 1, "1 should be equal to 1")
+        # endregion
+
+        # region assertNotEqual
+        self.assertNotEqual(1, 2)
+        self.assertNotEqual(1, 2, "1 should not be equal to 2")
+        # endregion
+
+        # region assertTrue
+        self.assertTrue(True)
+        self.assertTrue(True, "True should be True")
+        # endregion
+
+        # region assertFalse
+        self.assertFalse(False)
+        self.assertFalse(False, "False should be False")
+        # endregion
+
+        # region assertIsNone
+        self.assertIsNone(None)
+        self.assertIsNone(None, "None should be None")
+        # endregion
+
+        # region assertIsNotNone
+        self.assertIsNotNone(1)
+        self.assertIsNotNone(1, "1 should not be None")
+        # endregion
+
+        # region assertIn
+        self.assertIn("a", ["a", "b", "c"])
+        self.assertIn("a", ["a", "b", "c"], "'a' should be in the list")
+        # endregion
+
+        # region assertNotIn
+        self.assertNotIn("x", ["a", "b", "c"])
+        self.assertNotIn("x", ["a", "b", "c"], "'x' should not be in the list")
+        # endregion
+
+        # region assertIsInstance
+        self.assertIsInstance(1, int)
+        self.assertIsInstance(1, int, "1 should be an integer")
+        # endregion
+
+        # region assertNotIsInstance
+        self.assertNotIsInstance(1, str)
+        self.assertNotIsInstance(1, str, "1 should not be a string")
+        # endregion
+
+        # region assertRaises
+        with self.assertRaises(ValueError):
+            raise ValueError
+        # endregion
+
+        # region assertRaisesMessage
+        with self.assertRaisesMessage(ValueError, "Some message"):
+            raise ValueError("Some message")
+        # endregion
 
 
 class MyGeneralTestCase(TestCase):
@@ -49,6 +114,7 @@ class MyGeneralTestCase(TestCase):
     """
         This is why we prefer Client over HttpRequest. Because HttpRequest does not have session support by default.
     """
+
     @unittest.skip("demonstrating skipping")
     def test_authenticate_with_credentials_using_http_request(self):
         user = User.objects.create_user(username="test", password="test")
@@ -105,6 +171,7 @@ class MyGeneralTestCase(TestCase):
         print("### session_key: ", session_key)
         print("### session_user_id: ", session_user_id)
         # endregion
+
     # ==============================================================================================================
     # ==============================================================================================================
     # endregion Client() vs HttpRequest()
@@ -117,6 +184,7 @@ class MyGeneralTestCase(TestCase):
         response = self.client.get(reverse("home"))
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, "Welcome to my app")
+
     # ==============================================================================================================
     # ==============================================================================================================
     # endregion Testing Views
@@ -128,6 +196,7 @@ class MyGeneralTestCase(TestCase):
     def test_create_model(self):
         MyModel.objects.create(name="test")
         self.assertEqual(MyModel.objects.count(), 1)
+
     # ==============================================================================================================
     # ==============================================================================================================
     # endregion Testing Models
@@ -152,7 +221,6 @@ class MyGeneralTestCase(TestCase):
         print("### Slept for 5 seconds")
         self.assertEqual(1, 1)
 
-
     # @unittest.skip("demonstrating skipping")
     @tag("slow", "api")
     def test_multiple_tags(self):
@@ -160,59 +228,16 @@ class MyGeneralTestCase(TestCase):
         time.sleep(5)
         print("### Slept for 5 seconds")
         self.assertEqual(1, 1)
+
     # ==============================================================================================================
     # ==============================================================================================================
     # endregion Decorators
 
 
 class MyFixtureTestCase(TestCase):
-    fixtures = ["myapp/tests/fixtures/my_fixture.json",]  # it simply calls the manage.py loaddata command with the given fixture file
-
-    @unittest.skip("demonstrating skipping")
-    def test_fixture_loaded(self):
-        self.assertEqual(MyModel.objects.count(), 1)
-
-    @unittest.skip("demonstrating skipping")
-    def test_try_to_delete_loaded_fixture_forever(self):
-        MyModel.objects.all().delete()
-        self.assertEqual(MyModel.objects.count(), 0)
-
-    @unittest.skip("demonstrating skipping")
-    def test_if_fixture_deleted(self):
-        # the fixture is loaded again before each test so the previous test does not affect this test
-        # even if test_try_to_delete_loaded_fixture_forever test method is called after this test method
-        print("\n### MyModel.objects.count(): ", MyModel.objects.count(), "\n", flush=True)
-        self.assertEqual(MyModel.objects.count(), 1)
-
-    # @unittest.skip("demonstrating skipping")
-    def test_load_different_fixture(self):
-        # Ensure initial fixture is loaded
-        self.assertEqual(MyModel.objects.count(), 1, "Initial fixture should load 1 object.")
-
-        # Load another fixture
-        call_command("loaddata", "myapp/tests/fixtures/another_fixture.json")
-
-        # Verify the total count of objects
-        self.assertEqual(MyModel.objects.count(), 2, "Loading another fixture should add one more object.")
-
-        # Verify objects from both fixtures
-        try:
-            obj_from_my_fixture = MyModel.objects.get(name="Test Object 1")
-            obj_from_another_fixture = MyModel.objects.get(name="Test Object 2 - test different fixture")
-        except MyModel.DoesNotExist as e:
-            self.fail(f"Expected objects not found: {e}")
-
-        # Assert specific attributes of the objects
-        self.assertEqual(obj_from_my_fixture.name, "Test Object 1", "First object's name does not match.")
-        self.assertEqual(
-            obj_from_another_fixture.name,
-            "Test Object 2 - test different fixture",
-            "Second object's name does not match.",
-        )
-
-
-class MyFixtureTransactionTestCase(TransactionTestCase):
-    fixtures = ["myapp/tests/fixtures/my_fixture.json",]  # it simply calls the manage.py loaddata command with the given fixture file
+    fixtures = [
+        "myapp/tests/fixtures/my_fixture.json",
+    ]  # it simply calls the manage.py loaddata command with the given fixture file
 
     # @unittest.skip("demonstrating skipping")
     def test_fixture_loaded(self):
@@ -238,35 +263,49 @@ class MyFixtureTransactionTestCase(TransactionTestCase):
     def test_if_fixture_deleted(self):
         # the fixture is loaded again before each test so the previous test does not affect this test
         # even if test_try_to_delete_loaded_fixture_forever test method is called after this test method
-        print("\n### MyModel.objects.count(): ", MyModel.objects.count(), "\n", flush=True)
+        print(
+            "\n### MyModel.objects.count(): ", MyModel.objects.count(), "\n", flush=True
+        )
         self.assertEqual(MyModel.objects.count(), 1)
 
     # @unittest.skip("demonstrating skipping")
     def test_load_different_fixture(self):
         # Ensure initial fixture is loaded
-        self.assertEqual(MyModel.objects.count(), 1, "Initial fixture should load 1 object.")
+        self.assertEqual(
+            MyModel.objects.count(), 1, "Initial fixture should load 1 object."
+        )
 
         # Load another fixture
         call_command("loaddata", "myapp/tests/fixtures/another_fixture.json")
 
         # Verify the total count of objects
-        self.assertEqual(MyModel.objects.count(), 2, "Loading another fixture should add one more object.")
+        self.assertEqual(
+            MyModel.objects.count(),
+            2,
+            "Loading another fixture should add one more object.",
+        )
 
         # Verify objects from both fixtures
         try:
             obj_from_my_fixture = MyModel.objects.get(name="Test Object 1")
-            obj_from_another_fixture = MyModel.objects.get(name="Test Object 2 - test different fixture")
+            obj_from_another_fixture = MyModel.objects.get(
+                name="Test Object 2 - test different fixture"
+            )
         except MyModel.DoesNotExist as e:
             self.fail(f"Expected objects not found: {e}")
 
         # Assert specific attributes of the objects
-        self.assertEqual(obj_from_my_fixture.name, "Test Object 1", "First object's name does not match.")
+        self.assertEqual(
+            obj_from_my_fixture.name,
+            "Test Object 1",
+            "First object's name does not match.",
+        )
         self.assertEqual(
             obj_from_another_fixture.name,
             "Test Object 2 - test different fixture",
             "Second object's name does not match.",
         )
-    
+
     def test_try_to_delete_loaded_fixture_forever_v2(self):
         count = MyModel.objects.count()
         print("### count: ", count)
@@ -275,43 +314,135 @@ class MyFixtureTransactionTestCase(TransactionTestCase):
         self.assertEqual(MyModel.objects.count(), 0)
 
 
-class My_setUp_and_tearDown_TestCase(TestCase):
-    fixtures = ["myapp/tests/fixtures/my_fixture.json",]  # it simply calls the manage.py loaddata command with the given fixture file
+class MyFixtureTransactionTestCase(TransactionTestCase):
+    fixtures = [
+        "myapp/tests/fixtures/my_fixture.json",
+    ]  # it simply calls the manage.py loaddata command with the given fixture file
 
-    def setUp(self):
-        # print("\n### setUp() is called\n", flush=True)
-        self.user = User.objects.create_user(username="test", password="test")
-        self.user.save()
-
-    def tearDown(self):
-        # print("\n### tearDown() is called\n", flush=True)
-        # self.user.delete()
-        pass
-
-    @unittest.skip("demonstrating skipping")
-    def test_setUp_called(self):
-        self.assertEqual(User.objects.count(), 1)
-
-
-class MyTransactionTestCase(TransactionTestCase):
-    fixtures = ["myapp/tests/fixtures/my_fixture.json",]  # it simply calls the manage.py loaddata command with the given fixture file
-
-    def setUp(self):
-        # print("\n### setUp() is called\n", flush=True)
-        self.user = User.objects.create_user(username="test", password="test")
-        self.user.save()
-
-    def tearDown(self):
-        # print("\n### tearDown() is called\n", flush=True)
-        # self.user.delete()
-        pass
-
-    @unittest.skip("demonstrating skipping")
-    def test_setUp_called(self):
-        self.assertEqual(User.objects.count(), 1)
-
-    @unittest.skip("demonstrating skipping")
+    # @unittest.skip("demonstrating skipping")
     def test_fixture_loaded(self):
+        self.assertEqual(MyModel.objects.count(), 1)
+
+    # @unittest.skip("demonstrating skipping")
+    def test_a(self):
+        count = MyModel.objects.count()
+        print("### count: ", count)
+        self.assertEqual(count, 1)
+        MyModel.objects.all().delete()
+        self.assertEqual(MyModel.objects.count(), 0)
+
+    # @unittest.skip("demonstrating skipping")
+    def test_try_to_delete_loaded_fixture_forever(self):
+        count = MyModel.objects.count()
+        print("### count: ", count)
+        self.assertEqual(count, 1)
+        MyModel.objects.all().delete()
+        self.assertEqual(MyModel.objects.count(), 0)
+
+    # @unittest.skip("demonstrating skipping")
+    def test_if_fixture_deleted(self):
+        # the fixture is loaded again before each test so the previous test does not affect this test
+        # even if test_try_to_delete_loaded_fixture_forever test method is called after this test method
+        print(
+            "\n### MyModel.objects.count(): ", MyModel.objects.count(), "\n", flush=True
+        )
+        self.assertEqual(MyModel.objects.count(), 1)
+
+    # @unittest.skip("demonstrating skipping")
+    def test_load_different_fixture(self):
+        # Ensure initial fixture is loaded
+        self.assertEqual(
+            MyModel.objects.count(), 1, "Initial fixture should load 1 object."
+        )
+
+        # Load another fixture
+        call_command("loaddata", "myapp/tests/fixtures/another_fixture.json")
+
+        # Verify the total count of objects
+        self.assertEqual(
+            MyModel.objects.count(),
+            2,
+            "Loading another fixture should add one more object.",
+        )
+
+        # Verify objects from both fixtures
+        try:
+            obj_from_my_fixture = MyModel.objects.get(name="Test Object 1")
+            obj_from_another_fixture = MyModel.objects.get(
+                name="Test Object 2 - test different fixture"
+            )
+        except MyModel.DoesNotExist as e:
+            self.fail(f"Expected objects not found: {e}")
+
+        # Assert specific attributes of the objects
+        self.assertEqual(
+            obj_from_my_fixture.name,
+            "Test Object 1",
+            "First object's name does not match.",
+        )
+        self.assertEqual(
+            obj_from_another_fixture.name,
+            "Test Object 2 - test different fixture",
+            "Second object's name does not match.",
+        )
+
+    def test_try_to_delete_loaded_fixture_forever_v2(self):
+        count = MyModel.objects.count()
+        print("### count: ", count)
+        self.assertEqual(count, 1)
+        MyModel.objects.all().delete()
+        self.assertEqual(MyModel.objects.count(), 0)
+
+
+class My_setUp_and_tearDown_and_fixtures_TestCase(TestCase):
+    fixtures = [
+        "myapp/tests/fixtures/my_fixture.json",
+    ]  # it simply calls the manage.py loaddata command with the given fixture file
+
+    def setUp(self):
+        print("\n### setUp() is called\n", flush=True)
+        self.user = User.objects.create_user(username="test", password="test")
+        self.user.save()
+
+    def tearDown(self):
+        print("\n### tearDown() is called\n", flush=True)
+        # self.user.delete()
+        pass
+
+    # @unittest.skip("demonstrating skipping")
+    def test_setUp_called(self):
+        print("### test_setUp_called() is called\n", flush=True)
+        self.assertEqual(User.objects.count(), 1)
+
+    # @unittest.skip("demonstrating skipping")
+    def test_fixture_loaded(self):
+        print("### test_fixture_loaded() is called\n", flush=True)
+        self.assertEqual(MyModel.objects.count(), 1)
+
+
+class My_setUp_and_tearDown_and_fixtures_TransactionTestCase(TransactionTestCase):
+    fixtures = [
+        "myapp/tests/fixtures/my_fixture.json",
+    ]  # it simply calls the manage.py loaddata command with the given fixture file
+
+    def setUp(self):
+        print("\n### setUp() is called\n", flush=True)
+        self.user = User.objects.create_user(username="test", password="test")
+        self.user.save()
+
+    def tearDown(self):
+        print("\n### tearDown() is called\n", flush=True)
+        # self.user.delete()
+        pass
+
+    # @unittest.skip("demonstrating skipping")
+    def test_setUp_called(self):
+        print("### test_setUp_called() is called\n", flush=True)
+        self.assertEqual(User.objects.count(), 1)
+
+    # @unittest.skip("demonstrating skipping")
+    def test_fixture_loaded(self):
+        print("### test_fixture_loaded() is called\n", flush=True)
         self.assertEqual(MyModel.objects.count(), 1)
 
 
@@ -320,17 +451,21 @@ class Test_TestCaseBehavior(TestCase):
     def test_unique_unique_code_constraint(self):
         """
         The second create statement in this test does not raise an IntegrityError
-        because the unique constraint isn’t checked until the transaction is committed 
+        because the unique constraint isn’t checked until the transaction is committed
         (which happens after the test).
         """
         MyProduct.objects.create(name="Product A", unique_code="SKU001")
-        with self.assertRaises(IntegrityError):  # Should not raise IntegrityError here, # WARNING but it does in sqlite!!
+        with self.assertRaises(
+            IntegrityError
+        ):  # Should not raise IntegrityError here, # WARNING but it does in sqlite!!
             MyProduct.objects.create(name="Product B", unique_code="SKU001")
 
     # @unittest.skip("demonstrating skipping")
     def test_atomic_block(self):
         # <<< Start of implicit atomic block >>> #
-        self.assertFalse(transaction.get_autocommit(), "Test is not in an atomic block!")
+        self.assertFalse(
+            transaction.get_autocommit(), "Test is not in an atomic block!"
+        )
         MyProduct.objects.create(name="Product A", unique_code="SKU001")
         try:
             MyProduct.objects.create(name="Product B", unique_code="SKU001")
@@ -339,7 +474,7 @@ class Test_TestCaseBehavior(TestCase):
                 print("Transaction is broken. Needs rollback.")
                 # connection.rollback() ## cannot rollback. This is forbidden when an 'atomic' block is active.
             pass
-        self.assertEqual(MyProduct.objects.count(), 0)  
+        self.assertEqual(MyProduct.objects.count(), 0)
         # it should be 0 because the transaction is rolled back due to IntegrityError, BUT INSTEAD in sqlite...
         # ...it throws an error. "You can't execute queries until the end of the 'atomic' block."
         # Because the whole code is in an atomic block and it marked as broken query because of the error
@@ -371,12 +506,16 @@ class Test_TransactionTestCaseBehavior(TransactionTestCase):
         # No implicit atomic block here
         self.assertTrue(transaction.get_autocommit(), "Test is in an atomic block!")
 
-        MyProduct.objects.create(name="Product A", unique_code="SKU001") # This will be committed immediately to the database
+        MyProduct.objects.create(
+            name="Product A", unique_code="SKU001"
+        )  # This will be committed immediately to the database
         try:
             MyProduct.objects.create(name="Product B", unique_code="SKU001")
         except IntegrityError:
             pass
-        self.assertEqual(MyProduct.objects.count(), 1)  # it should be 1 because the first query is committed
+        self.assertEqual(
+            MyProduct.objects.count(), 1
+        )  # it should be 1 because the first query is committed
 
         # The changes remain committed during the test
 
@@ -392,18 +531,21 @@ class Test_TransactionTestCaseBehavior(TransactionTestCase):
 class MyFunctionalTestCase(StaticLiveServerTestCase):
     def setUp(self):
         # Path to chromedriver
-        webdriver_path = "webdriver/mac_arm/chromedriver"  # Change this to your correct path
+        webdriver_path = (
+            "webdriver/mac_arm/chromedriver"  # Change this to your correct path
+        )
 
         # Configure ChromeOptions
         chrome_options = Options()
         # chrome_options.add_argument("--headless")  # Run Chrome in headless mode (no GUI)
         chrome_options.add_argument("--disable-gpu")  # Disable GPU acceleration
-        chrome_options.add_argument("--no-sandbox")  # Bypass OS security model which is not supported in Docker
+        chrome_options.add_argument(
+            "--no-sandbox"
+        )  # Bypass OS security model which is not supported in Docker
 
         # Set up Chrome driver with Service and Options
         self.browser = webdriver.Chrome(
-            service=Service(webdriver_path),
-            options=chrome_options
+            service=Service(webdriver_path), options=chrome_options
         )
 
     def tearDown(self):
@@ -430,13 +572,15 @@ class MyFunctionalTestCase(StaticLiveServerTestCase):
         self.browser.get(self.live_server_url + reverse("login"))
         time.sleep(3)
         # Interact with the login form
-        self.browser.find_element(By.NAME, 'username').send_keys('test')
-        self.browser.find_element(By.NAME, 'password').send_keys('test')
-        self.browser.find_element(By.NAME, 'submit').click()
+        self.browser.find_element(By.NAME, "username").send_keys("test")
+        self.browser.find_element(By.NAME, "password").send_keys("test")
+        self.browser.find_element(By.NAME, "submit").click()
         time.sleep(3)
 
         # Check if the user is redirected to the home page
-        self.assertEqual(self.browser.current_url, self.live_server_url + reverse("home"))
+        self.assertEqual(
+            self.browser.current_url, self.live_server_url + reverse("home")
+        )
         # Check if the user is logged in and the username is displayed
         self.assertIn("Current user(request.user): test", self.browser.page_source)
 
